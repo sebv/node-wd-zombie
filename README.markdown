@@ -1,10 +1,11 @@
-Work just started on this
-
 # wd-zombie
 
-Trying to reimplement wd using zombie for headless testing
+wd headless twin.
 
-# TODO
+wd-zombie is an re-implementation of the [wd](https://github.com/admc/wd)interface using 
+[zombie](https://github.com/assaf/zombie).  
 
-* moveTo args
-* click button number support
+## doc
+
+Interface identical to [wd](https://github.com/admc/wd).
+
