@@ -2,12 +2,33 @@
 
 wd headless twin.
 
-wd-zombie is an re-implementation of the [wd](https://github.com/admc/wd) interface using 
+wd-zombie is an implementation of the [wd](https://github.com/admc/wd) interface using 
 [zombie](https://github.com/assaf/zombie).  
 
 ## usage
 
+### CoffeeScript
+
+```coffeescript
+webdriver = require("wd-zombie")
+assert = require("assert")
+
+browser = webdriver.remote()
+
+browser.init browserName: "zombie", ->
+  browser.get "http://saucelabs.com/test/guinea-pig", ->
+    browser.title (err, title) ->
+      assert.ok ~title.indexOf("I am a page title - Sauce Labs"), "Wrong title!"
+      browser.elementById "submit", (err, el) ->
+        browser.clickElement el, ->
+          browser.eval "window.location.href", (err, title) ->
+            console.log "Got title:" + title
+            assert.ok ~title.indexOf("#"), "Wrong title!"
+            browser.quit()            
+```
+
 ### JavaScript
+
 ```javascript
 var webdriver = require('wd-zombie');
 var assert = require('assert');
