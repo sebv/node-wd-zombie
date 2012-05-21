@@ -60,3 +60,7 @@ browser.init({
 
 Interface identical to [wd](https://github.com/admc/wd).
 
+## test
+
+cake test
+
