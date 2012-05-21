@@ -113,11 +113,11 @@ protocol.url = (done) ->
 protocol.quit = (done) ->
   @browser.windows.close(window) for window in @browser.windows.all()
   @browser = null
-  done null
+  done null if done?
 
 protocol.close = (done) ->
   @browser.windows.close(@browser.windows.current)
-  done null
+  done null if done?
 
 protocol.setPageLoadTimeout = (ms , done) ->
   @pageLoadTimeout = ms;

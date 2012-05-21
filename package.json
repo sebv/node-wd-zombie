@@ -2,9 +2,9 @@
     "name": "wd-zombie"
   , "version": "0.0.1"
   , "description": "wd headless implementation using zombie"
-  , "keywords": ["webdriver", "zombie", "wd", "headless", "test"]
+  , "keywords": ["zombie", "wd", "headless", "test"]
   , "author": "Seb Vincent <seb.vincent@gmail.com>"
-  , "--repository": { "type": "git", "url": "git@github.com:sebv/node-make-sync.git" }
+  , "repository": { "type": "git", "url": "git@github.com:sebv/node-wd-zombie.git" }
   , "main": "./index"
   , "engine": "node >= 0.6.1"
   , "scripts": {

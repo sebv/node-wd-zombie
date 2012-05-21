@@ -15,7 +15,9 @@ task 'clean', 'Remove all js files', ->
   u.js.clean JS_PATHS, undefined, /browser\-scripts/
 
 task 'test', 'Run All tests', ->
-  ./node_modules/.bin/nodeunit 'test/unit/*.coffee'
+  u.nodeunit.test 'test/unit'
+
+  #./node_modules/.bin/nodeunit 'test/unit/*.coffee'
 
 task 'grep:dirty', 'Lookup for debugger and console.log in code', ->
   u.grep.debug()
