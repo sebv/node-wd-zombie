@@ -390,6 +390,7 @@
       "back / forward": function(test) {
         return async.series([
           function(done) {
+            console.log("getting other page");
             return browser.get("http://127.0.0.1:8181/test-page.html?p=2", function(err) {
               should.not.exist(err);
               return done(null);
@@ -401,6 +402,7 @@
               return done(null);
             });
           }, function(done) {
+            console.log("back");
             return browser.back(function(err) {
               should.not.exist(err);
               return done(null);
@@ -412,6 +414,7 @@
               return done(null);
             });
           }, function(done) {
+            console.log("forward");
             return browser.forward(function(err) {
               should.not.exist(err);
               return done(null);
@@ -420,11 +423,6 @@
             return browser.url(function(err, url) {
               should.not.exist(err);
               url.should.include("?p=2");
-              return done(null);
-            });
-          }, function(done) {
-            return browser.get("http://127.0.0.1:8181/test-page.html", function(err) {
-              should.not.exist(err);
               return done(null);
             });
           }
@@ -730,16 +728,14 @@
           should.exist(anchor);
           return async.series([
             executeCoffee(browser, 'jQuery ->\n  a = $(\'#clickElement a\')\n  a.click ->\n    a.html \'clicked\'\n    false              '), function(done) {
-              return done(null);
-              /*            
-                        (done) -> textShouldEqual browser, anchor, "not clicked", done
-                        (done) ->
-              browser.clickElement anchor, (err) ->
-                should.not.exist err
-                done null
-                        (done) -> textShouldEqual browser, anchor, "clicked", done
-              */
-
+              return textShouldEqual(browser, anchor, "not clicked", done);
+            }, function(done) {
+              return browser.clickElement(anchor, function(err) {
+                should.not.exist(err);
+                return done(null);
+              });
+            }, function(done) {
+              return textShouldEqual(browser, anchor, "clicked", done);
             }
           ], function(err) {
             should.not.exist(err);

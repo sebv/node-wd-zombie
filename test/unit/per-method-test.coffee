@@ -308,6 +308,7 @@ runTestWith = (remoteWdConfig, desired) ->
     "back / forward": (test) ->
       async.series [
         (done) ->
+          console.log "getting other page"
           browser.get "http://127.0.0.1:8181/test-page.html?p=2", (err) ->
             should.not.exist err
             done null
@@ -317,6 +318,7 @@ runTestWith = (remoteWdConfig, desired) ->
             url.should.include "?p=2"
             done null
         (done) ->
+          console.log "back"
           browser.back  (err) ->
             should.not.exist err
             done null
@@ -326,6 +328,7 @@ runTestWith = (remoteWdConfig, desired) ->
             url.should.not.include "?p=2"
             done null
         (done) ->
+          console.log "forward"
           browser.forward  (err) ->
             should.not.exist err
             done null
@@ -334,10 +337,6 @@ runTestWith = (remoteWdConfig, desired) ->
             should.not.exist err            
             url.should.include "?p=2"
             done null            
-        (done) ->
-          browser.get "http://127.0.0.1:8181/test-page.html", (err) ->
-            should.not.exist err
-            done null
       ], (err) ->
         should.not.exist err
         test.done()        
@@ -624,16 +623,12 @@ runTestWith = (remoteWdConfig, desired) ->
                   a.html 'clicked'
                   false              
             '''
-          (done) -> 
-            done null
-            ###            
           (done) -> textShouldEqual browser, anchor, "not clicked", done
           (done) ->
             browser.clickElement anchor, (err) ->
               should.not.exist err
               done null
           (done) -> textShouldEqual browser, anchor, "clicked", done
-          ###
         ], (err) ->
           should.not.exist err
           test.done()        

@@ -62,9 +62,9 @@ _newModifierKeys = ->
     @metaKey = false
     @          
   
-protocol.init = (desired, done) ->
-  #@browser = new Browser debug:true
-  @browser = new Browser()
+protocol.init = (args..., done) ->
+  [desired] = args 
+  @browser = new Browser(desired)
   @browser.setMaxListeners(100)
   @modifierKeys = _newModifierKeys().reset()
   @implicitWaiTimeout = 0
@@ -294,7 +294,7 @@ protocol.elementOrNull = (searchType, value, done) ->
       done "Search type #{searchType} not supported." 
   
 protocol.element = (searchType, value, done) ->
-  @elementOrNull.apply @, [
+  protocol.elementOrNull.apply @, [
     searchType, value, (err, res) ->
       if err? then done err
       else if not res? then done status:7
@@ -302,7 +302,7 @@ protocol.element = (searchType, value, done) ->
   ]
     
 protocol.elementIfExists = (searchType, value, done) ->
-  @elementOrNull.apply @, [ 
+  protocol.elementOrNull.apply @, [ 
     searchType, value, (err, res) ->
       if err? then done err
       else if not res? then done null, undefined
@@ -310,7 +310,7 @@ protocol.elementIfExists = (searchType, value, done) ->
   ]
 
 protocol.hasElement = (searchType, value, done) ->
-  @elementOrNull.apply @, [
+  protocol.elementOrNull.apply @, [
     searchType, value, (err, res) ->
       if err? then done err
       else done null, res?
