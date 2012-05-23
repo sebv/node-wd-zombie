@@ -376,7 +376,7 @@
         });
       },
       "get": function(test) {
-        return browser.get("http://127.0.0.1:8181/test-page.html", function(err) {
+        return browser.get("http://127.0.0.1:8181/per-method-test-page.html", function(err) {
           should.not.exist(err);
           return test.done();
         });
@@ -391,7 +391,7 @@
         return async.series([
           function(done) {
             console.log("getting other page");
-            return browser.get("http://127.0.0.1:8181/test-page.html?p=2", function(err) {
+            return browser.get("http://127.0.0.1:8181/per-method-test-page.html?p=2", function(err) {
               should.not.exist(err);
               return done(null);
             });
@@ -1125,7 +1125,7 @@
       },
       "url": function(test) {
         return browser.url(function(err, res) {
-          res.should.include("test-page.html");
+          res.should.include("per-method-test-page.html");
           res.should.include("http://");
           return test.done();
         });
