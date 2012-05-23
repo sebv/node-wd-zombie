@@ -16,7 +16,7 @@ SUBMIT_VIRTUAL_KEYS = {
 };
 SUBMIT_VIRTUAL_KEY_ARRAY = (v for k,v of SUBMIT_VIRTUAL_KEYS)
 
-SUBMIT_CHAR_CODE_ARRAY = ['\n','\r']
+SUBMIT_CHAR_CODE_ARRAY = [10,13]
 
 # KEYDOWN trigger KEYPRES
 triggerKeypress = (e) -> 
@@ -32,13 +32,15 @@ triggerKeypress = (e) ->
   evObj.charCode = e.charCode
   e.target.dispatchEvent evObj
 
+# on keydown: trigger keypress
+
 HTML.HTMLInputElement.prototype._eventDefaults.keydown = (e) ->  
   triggerKeypress(e)
 
 HTML.HTMLTextAreaElement.prototype._eventDefaults.keydown = (e) ->  
   triggerKeypress(e)
 
-# KEYPRESS write the text 
+# on keypress: write the text 
 
 HTML.HTMLInputElement.prototype._eventDefaults.keypress = (e) ->  
   if (e.charCode in SUBMIT_CHAR_CODE_ARRAY) or (e.keyCode in SUBMIT_VIRTUAL_KEY_ARRAY )
@@ -49,8 +51,8 @@ HTML.HTMLInputElement.prototype._eventDefaults.keypress = (e) ->
     e.target.value = e.target.value + String.fromCharCode(e.charCode)    
 
 HTML.HTMLTextAreaElement.prototype._eventDefaults.keypress = (e) ->  
-  if (e.charCode in SUBMIT_CHAR_CODE_ARRAY) or (e.keyCode in SUBMIT_VIRTUAL_KEY_ARRAY )
-    e.target.form?.submit()
+  if (e.keyCode is 14) # Enter
+    e.target.value = e.target.value + '\r'
   else if e.keyCode in PRINTABLE_VIRTUAL_KEY_ARRAY 
     e.target.value = e.target.value + String.fromCharCode(e.keyCode)
   else if e.charCode?

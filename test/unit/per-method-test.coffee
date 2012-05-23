@@ -296,7 +296,7 @@ runTestWith = (remoteWdConfig, desired) ->
         test.done()
     
     "get": (test) ->
-      browser.get "http://127.0.0.1:8181/test-page.html", (err) ->
+      browser.get "http://127.0.0.1:8181/per-method-test-page.html", (err) ->
         should.not.exist err
         test.done()
         
@@ -309,7 +309,7 @@ runTestWith = (remoteWdConfig, desired) ->
       async.series [
         (done) ->
           console.log "getting other page"
-          browser.get "http://127.0.0.1:8181/test-page.html?p=2", (err) ->
+          browser.get "http://127.0.0.1:8181/per-method-test-page.html?p=2", (err) ->
             should.not.exist err
             done null
         (done) ->
@@ -993,7 +993,7 @@ runTestWith = (remoteWdConfig, desired) ->
       
     "url": (test) ->
       browser.url (err,res) ->
-        res.should.include "test-page.html"
+        res.should.include "per-method-test-page.html"
         res.should.include "http://"
         test.done(); 
     
