@@ -58,6 +58,13 @@ keysAndCheck = (browser, _sel, chars, expected, done) ->
       should.not.exist err
       done null
 
+inputAndCheck = (browser, method, _sel, chars, expected, done) ->
+  switch method
+    when 'type'
+      typeAndCheck browser, _sel, chars, expected, done
+    when 'keys'
+      keysAndCheck browser, _sel, chars, expected, done
+
 clearAndCheck = (browser, _sel, done) ->
   browser.elementByCss _sel, (err,inputField) ->
     should.not.exist err
@@ -99,12 +106,98 @@ altKeyTracking = (browser, _sel, done) ->
         e.preventDefault()
     """    
   executeCoffee browser, script , done
-      
+
+         
 runTestWith = (remoteWdConfig, desired) -> 
   browser = null;  
-  inputFieldSel = "#type input" 
-  textareaFieldSel = "#type textarea" 
+  testMethod = (method, sel) ->
+    {
+      "1/ typing nothing": (test) -> 
+        inputAndCheck browser, method, sel, "", "", ( (err) -> test.done(err) )
+      "2/ typing []": (test) -> 
+        inputAndCheck browser, method, sel, [], "", ( (err) -> test.done(err) )
+      "3/ typing 'Hello'": (test) -> 
+        inputAndCheck browser, method, sel, 'Hello', 'Hello', ( (err) -> test.done(err) )
+      "4/ clear": (test) -> 
+        clearAndCheck browser, sel, ( (err) -> test.done(err) )
+      "5/ typing ['Hello']": (test) -> 
+        inputAndCheck browser, method, sel, ['Hello'], 'Hello', ( (err) -> test.done(err) )
+      "6/ clear": (test) -> 
+        clearAndCheck browser, sel, ( (err) -> test.done(err) )
+      "7/ typing ['Hello',' ','World','!']": (test) -> 
+        inputAndCheck browser, method, sel, ['Hello',' ','World','!'], 'Hello World!', ( (err) -> test.done(err) )
+      "8/ clear": (test) -> 
+        clearAndCheck browser, sel, ( (err) -> test.done(err) )
+      "9/ typing 'Hello\\n'": (test) ->
+        expected = (if sel.match /input/ then 'Hello' else 'Hello\n') 
+        inputAndCheck browser, method, sel, 'Hello\n', expected, ( (err) -> test.done(err) )
+      "10/ typing '\\r'": (test) -> 
+        expected = (if sel.match /input/ then 'Hello' else 'Hello\n\r') 
+        inputAndCheck browser, method, sel, '\r', expected, ( (err) -> test.done(err) )
+      "11/ typing [returnKey]": (test) -> 
+        expected = (if sel.match /input/ then 'Hello' else 'Hello\n\r\r') 
+        inputAndCheck browser, method, sel, [returnKey], expected, ( (err) -> test.done(err) )
+      "12/ typing [enterKey]": (test) -> 
+        expected = (if sel.match /input/ then 'Hello' else 'Hello\n\r\r\r') 
+        inputAndCheck browser, method, sel, [enterKey], expected, ( (err) -> test.done(err) )
+      "13/ typing ' World!'": (test) -> 
+        expected = (if sel.match /input/ then 'Hello World!' else 'Hello\n\r\r\r World!') 
+        inputAndCheck browser, method, sel, ' World!', expected, ( (err) -> test.done(err) )
+      "14/ clear": (test) -> 
+        clearAndCheck browser, sel, ( (err) -> test.done(err) )
+      "15/ preventing default on keydown": (test) -> 
+        preventDefault browser, sel, 'keydown', ( (err) -> test.done(err) )      
+      "16/ typing 'Hello'": (test) -> 
+        inputAndCheck browser, method, sel, 'Hello', '', ( (err) -> test.done(err) )
+      "17/ unbinding keydown": (test) ->
+        unbind browser, sel, 'keydown', ( (err) -> test.done(err) )      
+      "18/ typing 'Hello'": (test) -> 
+        inputAndCheck browser, method, sel, 'Hello', 'Hello', ( (err) -> test.done(err) )
+      "19/ clear": (test) -> 
+        clearAndCheck browser, sel, ( (err) -> test.done(err) )      
+      "20/ preventing default on keypress": (test) -> 
+        preventDefault browser, sel, 'keypress', ( (err) -> test.done(err) )      
+      "21/ typing 'Hello'": (test) -> 
+        inputAndCheck browser, method, sel, 'Hello', '', ( (err) -> test.done(err) )
+      "22/ unbinding keypress": (test) ->
+        unbind browser, sel, 'keypress', ( (err) -> test.done(err) )      
+      "23/ typing 'Hello'": (test) -> 
+        inputAndCheck browser, method, sel, 'Hello', 'Hello', ( (err) -> test.done(err) )
+      "24/ clear": (test) -> 
+        clearAndCheck browser, sel, ( (err) -> test.done(err) )      
+      "25/ preventing default on keyup": (test) -> 
+        preventDefault browser, sel, 'keyup', ( (err) -> test.done(err) )      
+      "26/ typing 'Hello'": (test) -> 
+        inputAndCheck browser, method, sel, 'Hello', 'Hello', ( (err) -> test.done(err) )
+      "27/ unbinding keypress": (test) ->
+        unbind browser, sel, 'keyup', ( (err) -> test.done(err) )      
+      "28/ clear": (test) -> 
+        clearAndCheck browser, sel, ( (err) -> test.done(err) )   
+      "29/ adding alt key tracking": (test) ->         
+        altKeyTracking browser, sel, ( (err) -> test.done(err) )   
+      "30/ typing ['a']": (test) -> 
+        inputAndCheck browser, method, sel, ['a'], 'altKey off', ( (err) -> test.done(err) )
+      "31/ typing [altKey,nullKey,'a']": (test) -> 
+        inputAndCheck browser, method, sel, [altKey,nullKey,'a'], 'altKey off', ( (err) -> test.done(err) )
+      "32/ typing [altKey,'a']": (test) -> 
+        inputAndCheck browser, method, sel, [altKey,'a'], 'altKey on', ( (err) -> test.done(err) )
+      "33/ typing ['a']": (test) -> 
+        expected = (if method is 'type' then 'altKey off' else 'altKey on') 
+        inputAndCheck browser, method, sel, ['a'], expected, ( (err) -> test.done(err) )
+      "34/ clear": (test) -> 
+        clearAndCheck browser, sel, ( (err) -> test.done(err) )   
+      "35/ typing [nullKey]": (test) -> 
+        inputAndCheck browser, method, sel, [nullKey], '', ( (err) -> test.done(err) )
+      "36/ typing ['a']": (test) -> 
+        inputAndCheck browser, method, sel, ['a'], 'altKey off', ( (err) -> test.done(err) )        
+      "37/ clear": (test) -> 
+        clearAndCheck browser, sel, ( (err) -> test.done(err) )   
+      "38/ unbinding keydown": (test) ->
+        unbind browser, sel, 'keydown', ( (err) -> test.done(err) )     
+    }
   {
+    setUp: (done) ->
+      done null
     "wd.remote": (test) ->
       browser = wd.remote remoteWdConfig    
       browser.on "status", (info) ->
@@ -123,321 +216,15 @@ runTestWith = (remoteWdConfig, desired) ->
         should.not.exist err
         test.done()
     
-    "input":      
-      "type":
-        "1/ typing nothing": (test) -> 
-          typeAndCheck browser, inputFieldSel, "", "", ( (err) -> test.done(err) )
-        "2/ typing []": (test) -> 
-          typeAndCheck browser, inputFieldSel, [], "", ( (err) -> test.done(err) )
-        "3/ typing 'Hello'": (test) -> 
-          typeAndCheck browser, inputFieldSel, 'Hello', 'Hello', ( (err) -> test.done(err) )
-        "4/ clear": (test) -> 
-          clearAndCheck browser, inputFieldSel, ( (err) -> test.done(err) )
-        "5/ typing ['Hello']": (test) -> 
-          typeAndCheck browser, inputFieldSel, ['Hello'], 'Hello', ( (err) -> test.done(err) )
-        "6/ clear": (test) -> 
-          clearAndCheck browser, inputFieldSel, ( (err) -> test.done(err) )
-        "7/ typing ['Hello',' ','World','!']": (test) -> 
-          typeAndCheck browser, inputFieldSel, ['Hello',' ','World','!'], 'Hello World!', ( (err) -> test.done(err) )
-        "8/ clear": (test) -> 
-          clearAndCheck browser, inputFieldSel, ( (err) -> test.done(err) )
-        "9/ typing 'Hello\\n'": (test) -> 
-          typeAndCheck browser, inputFieldSel, 'Hello\n', 'Hello', ( (err) -> test.done(err) )
-        "10/ typing '\\r'": (test) -> 
-          typeAndCheck browser, inputFieldSel, '\r', 'Hello', ( (err) -> test.done(err) )
-        "11/ typing [returnKey]": (test) -> 
-          typeAndCheck browser, inputFieldSel, [returnKey], 'Hello', ( (err) -> test.done(err) )
-        "13/ typing [enterKey]": (test) -> 
-          typeAndCheck browser, inputFieldSel, [enterKey], 'Hello', ( (err) -> test.done(err) )
-        "14/ typing ' World!'": (test) -> 
-          typeAndCheck browser, inputFieldSel, ' World!', 'Hello World!', ( (err) -> test.done(err) )
-        "15/ clear": (test) -> 
-          clearAndCheck browser, inputFieldSel, ( (err) -> test.done(err) )
-        "16/ preventing default on keydown": (test) -> 
-          preventDefault browser, inputFieldSel, 'keydown', ( (err) -> test.done(err) )      
-        "17/ typing 'Hello'": (test) -> 
-          typeAndCheck browser, inputFieldSel, 'Hello', '', ( (err) -> test.done(err) )
-        "18/ unbinding keydown": (test) ->
-          unbind browser, inputFieldSel, 'keydown', ( (err) -> test.done(err) )      
-        "19/ typing 'Hello'": (test) -> 
-          typeAndCheck browser, inputFieldSel, 'Hello', 'Hello', ( (err) -> test.done(err) )
-        "20/ clear": (test) -> 
-          clearAndCheck browser, inputFieldSel, ( (err) -> test.done(err) )      
-        "21/ preventing default on keypress": (test) -> 
-          preventDefault browser, inputFieldSel, 'keypress', ( (err) -> test.done(err) )      
-        "22/ typing 'Hello'": (test) -> 
-          typeAndCheck browser, inputFieldSel, 'Hello', '', ( (err) -> test.done(err) )
-        "23/ unbinding keypress": (test) ->
-          unbind browser, inputFieldSel, 'keypress', ( (err) -> test.done(err) )      
-        "24/ typing 'Hello'": (test) -> 
-          typeAndCheck browser, inputFieldSel, 'Hello', 'Hello', ( (err) -> test.done(err) )
-        "25/ clear": (test) -> 
-          clearAndCheck browser, inputFieldSel, ( (err) -> test.done(err) )      
-        "26/ preventing default on keyup": (test) -> 
-          preventDefault browser, inputFieldSel, 'keyup', ( (err) -> test.done(err) )      
-        "27/ typing 'Hello'": (test) -> 
-          typeAndCheck browser, inputFieldSel, 'Hello', 'Hello', ( (err) -> test.done(err) )
-        "28/ unbinding keypress": (test) ->
-          unbind browser, inputFieldSel, 'keyup', ( (err) -> test.done(err) )      
-        "30/ clear": (test) -> 
-          clearAndCheck browser, inputFieldSel, ( (err) -> test.done(err) )   
-        "31/ adding alt key tracking": (test) ->         
-          altKeyTracking browser, inputFieldSel, ( (err) -> test.done(err) )   
-        "32/ typing ['a']": (test) -> 
-          typeAndCheck browser, inputFieldSel, ['a'], 'altKey off', ( (err) -> test.done(err) )
-        "33/ typing [altKey,nullKey,'a']": (test) -> 
-          typeAndCheck browser, inputFieldSel, [altKey,nullKey,'a'], 'altKey off', ( (err) -> test.done(err) )
-        "34/ typing [altKey,'a']": (test) -> 
-          typeAndCheck browser, inputFieldSel, [altKey,'a'], 'altKey on', ( (err) -> test.done(err) )
-        "35/ typing ['a']": (test) -> 
-          typeAndCheck browser, inputFieldSel, ['a'], 'altKey off', ( (err) -> test.done(err) )
-        "36/ clear": (test) -> 
-          clearAndCheck browser, inputFieldSel, ( (err) -> test.done(err) )   
-        "37/ typing [nullKey]": (test) -> 
-          typeAndCheck browser, inputFieldSel, [nullKey], '', ( (err) -> test.done(err) )
-        "38/ typing ['a']": (test) -> 
-          keysAndCheck browser, inputFieldSel, ['a'], 'altKey off', ( (err) -> test.done(err) )        
-        "39/ clear": (test) -> 
-          clearAndCheck browser, inputFieldSel, ( (err) -> test.done(err) )   
-        "40/ unbinding keydown": (test) ->
-          unbind browser, inputFieldSel, 'keydown', ( (err) -> test.done(err) )      
-          
-      "keys":
-        "1/ typing nothing": (test) -> 
-          keysAndCheck browser, inputFieldSel, "", "", ( (err) -> test.done(err) )
-        "2/ typing []": (test) -> 
-          keysAndCheck browser, inputFieldSel, [], "", ( (err) -> test.done(err) )
-        "3/ typing 'Hello'": (test) -> 
-          keysAndCheck browser, inputFieldSel, 'Hello', 'Hello', ( (err) -> test.done(err) )
-        "4/ clear": (test) -> 
-          clearAndCheck browser, inputFieldSel, ( (err) -> test.done(err) )
-        "5/ typing ['Hello']": (test) -> 
-          keysAndCheck browser, inputFieldSel, ['Hello'], 'Hello', ( (err) -> test.done(err) )
-        "6/ clear": (test) -> 
-          clearAndCheck browser, inputFieldSel, ( (err) -> test.done(err) )
-        "7/ typing ['Hello',' ','World','!']": (test) -> 
-          keysAndCheck browser, inputFieldSel, ['Hello',' ','World','!'], 'Hello World!', ( (err) -> test.done(err) )
-        "8/ clear": (test) -> 
-          clearAndCheck browser, inputFieldSel, ( (err) -> test.done(err) )
-        "9/ typing 'Hello\\n'": (test) -> 
-          keysAndCheck browser, inputFieldSel, 'Hello\n', 'Hello', ( (err) -> test.done(err) )
-        "10/ typing '\\r'": (test) -> 
-          keysAndCheck browser, inputFieldSel, '\r', 'Hello', ( (err) -> test.done(err) )
-        "11/ typing [returnKey]": (test) -> 
-          keysAndCheck browser, inputFieldSel, [returnKey], 'Hello', ( (err) -> test.done(err) )
-        "13/ typing [enterKey]": (test) -> 
-          keysAndCheck browser, inputFieldSel, [enterKey], 'Hello', ( (err) -> test.done(err) )
-        "14/ typing ' World!'": (test) -> 
-          keysAndCheck browser, inputFieldSel, ' World!', 'Hello World!', ( (err) -> test.done(err) )
-        "15/ clear": (test) -> 
-          clearAndCheck browser, inputFieldSel, ( (err) -> test.done(err) )
-        "16/ preventing default on keydown": (test) -> 
-          preventDefault browser, inputFieldSel, 'keydown', ( (err) -> test.done(err) )      
-        "17/ typing 'Hello'": (test) -> 
-          keysAndCheck browser, inputFieldSel, 'Hello', '', ( (err) -> test.done(err) )
-        "18/ unbinding keydown": (test) ->
-          unbind browser, inputFieldSel, 'keydown', ( (err) -> test.done(err) )      
-        "19/ typing 'Hello'": (test) -> 
-          keysAndCheck browser, inputFieldSel, 'Hello', 'Hello', ( (err) -> test.done(err) )
-        "20/ clear": (test) -> 
-          clearAndCheck browser, inputFieldSel, ( (err) -> test.done(err) )      
-        "21/ preventing default on keypress": (test) -> 
-          preventDefault browser, inputFieldSel, 'keypress', ( (err) -> test.done(err) )      
-        "22/ typing 'Hello'": (test) -> 
-          keysAndCheck browser, inputFieldSel, 'Hello', '', ( (err) -> test.done(err) )
-        "23/ unbinding keypress": (test) ->
-          unbind browser, inputFieldSel, 'keypress', ( (err) -> test.done(err) )      
-        "24/ typing 'Hello'": (test) -> 
-          keysAndCheck browser, inputFieldSel, 'Hello', 'Hello', ( (err) -> test.done(err) )
-        "25/ clear": (test) -> 
-          clearAndCheck browser, inputFieldSel, ( (err) -> test.done(err) )      
-        "26/ preventing default on keyup": (test) -> 
-          preventDefault browser, inputFieldSel, 'keyup', ( (err) -> test.done(err) )      
-        "27/ typing 'Hello'": (test) -> 
-          keysAndCheck browser, inputFieldSel, 'Hello', 'Hello', ( (err) -> test.done(err) )
-        "28/ unbinding keypress": (test) ->
-          unbind browser, inputFieldSel, 'keyup', ( (err) -> test.done(err) )      
-        "30/ clear": (test) -> 
-          clearAndCheck browser, inputFieldSel, ( (err) -> test.done(err) )           
-        "31/ adding alt key tracking": (test) ->         
-          altKeyTracking browser, inputFieldSel, ( (err) -> test.done(err) )   
-        "32/ typing ['a']": (test) -> 
-          keysAndCheck browser, inputFieldSel, ['a'], 'altKey off', ( (err) -> test.done(err) )        
-        "33/ typing [altKey,nullKey,'a']": (test) -> 
-          keysAndCheck browser, inputFieldSel, [altKey,nullKey,'a'], 'altKey off', ( (err) -> test.done(err) )        
-        "34/ typing [altKey,'a']": (test) -> 
-          keysAndCheck browser, inputFieldSel, [altKey,'a'], 'altKey on', ( (err) -> test.done(err) )        
-        "35/ typing ['a']": (test) -> 
-          keysAndCheck browser, inputFieldSel, ['a'], 'altKey on', ( (err) -> test.done(err) )        
-        "36/ clear": (test) -> 
-          clearAndCheck browser, inputFieldSel, ( (err) -> test.done(err) )   
-        "37/ typing [nullKey]": (test) -> 
-          keysAndCheck browser, inputFieldSel, [nullKey], '', ( (err) -> test.done(err) )
-        "38/ typing ['a']": (test) -> 
-          keysAndCheck browser, inputFieldSel, ['a'], 'altKey off', ( (err) -> test.done(err) )        
-        "39/ clear": (test) -> 
-          clearAndCheck browser, inputFieldSel, ( (err) -> test.done(err) )   
-        "40/ unbinding keypress": (test) ->
-          unbind browser, inputFieldSel, 'keypress', ( (err) -> test.done(err) )      
     
-    "textarea":
-      "type":
-        "1/ typing nothing": (test) -> 
-          typeAndCheck browser, textareaFieldSel, "", "", ( (err) -> test.done(err) )
-        "2/ typing []": (test) -> 
-          typeAndCheck browser, textareaFieldSel, [], "", ( (err) -> test.done(err) )
-        "3/ typing 'Hello'": (test) -> 
-          typeAndCheck browser, textareaFieldSel, 'Hello', 'Hello', ( (err) -> test.done(err) )
-        "4/ clear": (test) -> 
-          clearAndCheck browser, textareaFieldSel, ( (err) -> test.done(err) )
-        "5/ typing ['Hello']": (test) -> 
-          typeAndCheck browser, textareaFieldSel, ['Hello'], 'Hello', ( (err) -> test.done(err) )
-        "6/ clear": (test) -> 
-          clearAndCheck browser, textareaFieldSel, ( (err) -> test.done(err) )
-        "7/ typing ['Hello',' ','World','!']": (test) -> 
-          typeAndCheck browser, textareaFieldSel, ['Hello',' ','World','!'], 'Hello World!', ( (err) -> test.done(err) )
-        "8/ clear": (test) -> 
-          clearAndCheck browser, textareaFieldSel, ( (err) -> test.done(err) )
-        "9/ typing 'Hello\\n'": (test) -> 
-          typeAndCheck browser, textareaFieldSel, 'Hello\n', 'Hello\n', ( (err) -> test.done(err) )      
-        "10/ typing '\\r'": (test) -> 
-          typeAndCheck browser, textareaFieldSel, '\r', 'Hello\n\r', ( (err) -> test.done(err) )
-        "11/ typing [returnKey]": (test) -> 
-          typeAndCheck browser, textareaFieldSel, [returnKey], 'Hello\n\r\r', ( (err) -> test.done(err) )      
-        "13/ typing [enterKey]": (test) -> 
-          typeAndCheck browser, textareaFieldSel, [enterKey], 'Hello\n\r\r\r', ( (err) -> test.done(err) )
-        "14/ typing ' World!'": (test) -> 
-          typeAndCheck browser, textareaFieldSel, ' World!', 'Hello\n\r\r\r World!', ( (err) -> test.done(err) )
-        "15/ clear": (test) -> 
-          clearAndCheck browser, textareaFieldSel, ( (err) -> test.done(err) )      
-        "16/ preventing default on keydown": (test) -> 
-          preventDefault browser, textareaFieldSel, 'keydown', ( (err) -> test.done(err) )      
-        "17/ typing 'Hello'": (test) -> 
-          typeAndCheck browser, textareaFieldSel, 'Hello', '', ( (err) -> test.done(err) )      
-        "18/ unbinding keydown": (test) ->
-          unbind browser, textareaFieldSel, 'keydown', ( (err) -> test.done(err) )      
-        "19/ typing 'Hello'": (test) -> 
-          typeAndCheck browser, textareaFieldSel, 'Hello', 'Hello', ( (err) -> test.done(err) )
-        "20/ clear": (test) -> 
-          clearAndCheck browser, textareaFieldSel, ( (err) -> test.done(err) )      
-        "21/ preventing default on keypress": (test) -> 
-          preventDefault browser, textareaFieldSel, 'keypress', ( (err) -> test.done(err) )      
-        "22/ typing 'Hello'": (test) -> 
-          typeAndCheck browser, textareaFieldSel, 'Hello', '', ( (err) -> test.done(err) )
-        "23/ unbinding keypress": (test) ->
-          unbind browser, textareaFieldSel, 'keypress', ( (err) -> test.done(err) )            
-        "24/ typing 'Hello'": (test) -> 
-          typeAndCheck browser, textareaFieldSel, 'Hello', 'Hello', ( (err) -> test.done(err) )
-        "25/ clear": (test) -> 
-          clearAndCheck browser, textareaFieldSel, ( (err) -> test.done(err) )      
-        "26/ preventing default on keyup": (test) -> 
-          preventDefault browser, textareaFieldSel, 'keyup', ( (err) -> test.done(err) )              
-        "27/ typing 'Hello'": (test) -> 
-          typeAndCheck browser, textareaFieldSel, 'Hello', 'Hello', ( (err) -> test.done(err) )
-        "28/ unbinding keypress": (test) ->
-          unbind browser, textareaFieldSel, 'keyup', ( (err) -> test.done(err) )      
-        "30/ clear": (test) -> 
-          clearAndCheck browser, textareaFieldSel, ( (err) -> test.done(err) )      
-        "31/ adding alt key tracking": (test) ->         
-          altKeyTracking browser, textareaFieldSel, ( (err) -> test.done(err) )   
-        "32/ typing ['a']": (test) -> 
-          typeAndCheck browser, textareaFieldSel, ['a'], 'altKey off', ( (err) -> test.done(err) )
-        "33/ typing [altKey,nullKey,'a']": (test) -> 
-          typeAndCheck browser, textareaFieldSel, [altKey,nullKey,'a'], 'altKey off', ( (err) -> test.done(err) )
-        "34/ typing [altKey,'a']": (test) -> 
-          typeAndCheck browser, textareaFieldSel, [altKey,'a'], 'altKey on', ( (err) -> test.done(err) )
-        "35/ typing ['a']": (test) -> 
-          typeAndCheck browser, textareaFieldSel, ['a'], 'altKey off', ( (err) -> test.done(err) )
-        "36/ clear": (test) -> 
-          clearAndCheck browser, textareaFieldSel, ( (err) -> test.done(err) )   
-        "37/ typing [nullKey]": (test) -> 
-          typeAndCheck browser, textareaFieldSel, [nullKey], '', ( (err) -> test.done(err) )
-        "38/ typing ['a']": (test) -> 
-          keysAndCheck browser, textareaFieldSel, ['a'], 'altKey off', ( (err) -> test.done(err) )        
-        "39/ clear": (test) -> 
-          clearAndCheck browser, textareaFieldSel, ( (err) -> test.done(err) )   
-        "40/ unbinding keydown": (test) ->
-          unbind browser, textareaFieldSel, 'keydown', ( (err) -> test.done(err) )      
 
-      "keys":
-        "1/ typing nothing": (test) -> 
-          keysAndCheck browser, textareaFieldSel, "", "", ( (err) -> test.done(err) )
-        "2/ typing []": (test) -> 
-          keysAndCheck browser, textareaFieldSel, [], "", ( (err) -> test.done(err) )
-        "3/ typing 'Hello'": (test) -> 
-          keysAndCheck browser, textareaFieldSel, 'Hello', 'Hello', ( (err) -> test.done(err) )
-        "4/ clear": (test) -> 
-          clearAndCheck browser, textareaFieldSel, ( (err) -> test.done(err) )
-        "5/ typing ['Hello']": (test) -> 
-          keysAndCheck browser, textareaFieldSel, ['Hello'], 'Hello', ( (err) -> test.done(err) )
-        "6/ clear": (test) -> 
-          clearAndCheck browser, textareaFieldSel, ( (err) -> test.done(err) )
-        "7/ typing ['Hello',' ','World','!']": (test) -> 
-          keysAndCheck browser, textareaFieldSel, ['Hello',' ','World','!'], 'Hello World!', ( (err) -> test.done(err) )
-        "8/ clear": (test) -> 
-          clearAndCheck browser, textareaFieldSel, ( (err) -> test.done(err) )
-        "9/ typing 'Hello\\n'": (test) -> 
-          keysAndCheck browser, textareaFieldSel, 'Hello\n', 'Hello\n', ( (err) -> test.done(err) )      
-        "10/ typing '\\r'": (test) -> 
-          keysAndCheck browser, textareaFieldSel, '\r', 'Hello\n\r', ( (err) -> test.done(err) )
-        "11/ typing [returnKey]": (test) -> 
-          keysAndCheck browser, textareaFieldSel, [returnKey], 'Hello\n\r\r', ( (err) -> test.done(err) )      
-        "13/ typing [enterKey]": (test) -> 
-          keysAndCheck browser, textareaFieldSel, [enterKey], 'Hello\n\r\r\r', ( (err) -> test.done(err) )
-        "14/ typing ' World!'": (test) -> 
-          keysAndCheck browser, textareaFieldSel, ' World!', 'Hello\n\r\r\r World!', ( (err) -> test.done(err) )
-        "15/ clear": (test) -> 
-          clearAndCheck browser, textareaFieldSel, ( (err) -> test.done(err) )      
-        "16/ preventing default on keydown": (test) -> 
-          preventDefault browser, textareaFieldSel, 'keydown', ( (err) -> test.done(err) )      
-        "17/ typing 'Hello'": (test) -> 
-          keysAndCheck browser, textareaFieldSel, 'Hello', '', ( (err) -> test.done(err) )      
-        "18/ unbinding keydown": (test) ->
-          unbind browser, textareaFieldSel, 'keydown', ( (err) -> test.done(err) )      
-        "19/ typing 'Hello'": (test) -> 
-          keysAndCheck browser, textareaFieldSel, 'Hello', 'Hello', ( (err) -> test.done(err) )
-        "20/ clear": (test) -> 
-          clearAndCheck browser, textareaFieldSel, ( (err) -> test.done(err) )      
-        "21/ preventing default on keypress": (test) -> 
-          preventDefault browser, textareaFieldSel, 'keypress', ( (err) -> test.done(err) )      
-        "22/ typing 'Hello'": (test) -> 
-          keysAndCheck browser, textareaFieldSel, 'Hello', '', ( (err) -> test.done(err) )
-        "23/ unbinding keypress": (test) ->
-          unbind browser, textareaFieldSel, 'keypress', ( (err) -> test.done(err) )            
-        "24/ typing 'Hello'": (test) -> 
-          keysAndCheck browser, textareaFieldSel, 'Hello', 'Hello', ( (err) -> test.done(err) )
-        "25/ clear": (test) -> 
-          clearAndCheck browser, textareaFieldSel, ( (err) -> test.done(err) )      
-        "26/ preventing default on keyup": (test) -> 
-          preventDefault browser, textareaFieldSel, 'keyup', ( (err) -> test.done(err) )              
-        "27/ typing 'Hello'": (test) -> 
-          keysAndCheck browser, textareaFieldSel, 'Hello', 'Hello', ( (err) -> test.done(err) )
-        "28/ unbinding keypress": (test) ->
-          unbind browser, textareaFieldSel, 'keyup', ( (err) -> test.done(err) )      
-        "30/ clear": (test) -> 
-          clearAndCheck browser, textareaFieldSel, ( (err) -> test.done(err) )              
-        "31/ adding alt key tracking": (test) ->         
-          altKeyTracking browser, textareaFieldSel, ( (err) -> test.done(err) )   
-        "32/ typing ['a']": (test) -> 
-          keysAndCheck browser, textareaFieldSel, ['a'], 'altKey off', ( (err) -> test.done(err) )        
-        "33/ typing [altKey,nullKey,'a']": (test) -> 
-          keysAndCheck browser, textareaFieldSel, [altKey,nullKey,'a'], 'altKey off', ( (err) -> test.done(err) )
-        "34/ typing [altKey,'a']": (test) -> 
-          keysAndCheck browser, textareaFieldSel, [altKey,'a'], 'altKey on', ( (err) -> test.done(err) )
-        "35/ typing ['a']": (test) -> 
-          keysAndCheck browser, textareaFieldSel, ['a'], 'altKey on', ( (err) -> test.done(err) )
-        "36/ clear": (test) -> 
-          clearAndCheck browser, textareaFieldSel, ( (err) -> test.done(err) )   
-        "37/ typing [nullKey]": (test) -> 
-          keysAndCheck browser, textareaFieldSel, [nullKey], '', ( (err) -> test.done(err) )
-        "38/ typing ['a']": (test) -> 
-          keysAndCheck browser, textareaFieldSel, ['a'], 'altKey off', ( (err) -> test.done(err) )        
-        "39/ clear": (test) -> 
-          clearAndCheck browser, textareaFieldSel, ( (err) -> test.done(err) )   
-        "40/ unbinding keydown": (test) ->
-          unbind browser, textareaFieldSel, 'keydown', ( (err) -> test.done(err) )      
- 
-     
+    "input":      
+      "type": testMethod "type", "#type input"
+      "keys": testMethod "keys", "#type input"
+    "textarea":
+      "type": testMethod "type", "#type textarea"      
+      "keys": testMethod "keys", "#type textarea"
+          
     "quit": (test) ->        
       browser.quit (err) ->
         should.not.exist err
