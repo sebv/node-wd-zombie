@@ -2,7 +2,7 @@
 
 wd headless twin.
 
-wd-zombie is an implementation of the [wd](https://github.com/admc/wd) interface using 
+wd-zombie is a [wd](https://github.com/admc/wd) API implementation using 
 [zombie](https://github.com/assaf/zombie).  
 
 ## usage
