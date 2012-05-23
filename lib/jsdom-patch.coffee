@@ -18,7 +18,6 @@ SUBMIT_VIRTUAL_KEY_ARRAY = (v for k,v of SUBMIT_VIRTUAL_KEYS)
 
 SUBMIT_CHAR_CODE_ARRAY = [10,13]
 
-# KEYDOWN trigger KEYPRES
 triggerKeypress = (e) -> 
   document = e.target.ownerDocument  
   evObj = document.createEvent "UIEvents"
