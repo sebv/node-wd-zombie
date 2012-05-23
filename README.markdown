@@ -58,7 +58,14 @@ browser.init({
 ```
 ## doc
 
+### wd methods
+
 Interface identical to [wd](https://github.com/admc/wd).
+
+### extra methods
+
+*  retrieve the zombie browser object: 
+  zombieBrowser(done) -> done(err, browser) 
 
 ## test
 

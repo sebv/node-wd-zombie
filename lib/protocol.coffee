@@ -1,8 +1,8 @@
 fs = require 'fs'
 Browser = require 'zombie'
-require "./jsdom-patch"
+require "./jsdom-patch" 
 uuid = require 'node-uuid'
-protocol = {}
+
 SPECIAL_KEYS = require "./special-keys"
 SPECIAL_KEY_ARRAY = (v for k,v of SPECIAL_KEYS)
 MODIFIER_KEYS = {
@@ -13,9 +13,8 @@ MODIFIER_KEYS = {
   metaKey: '\uE03D'
 }
 MODIFIER_KEY_ARRAY = (v for k,v of MODIFIER_KEYS)
-ASCII_SPECIAL_KEYS = require "./ascii-special-keys"
-#SPECIAL_KEY_ARRAY = (v for k,v of SPECIAL_KEYS)
 
+ASCII_SPECIAL_KEYS = require "./ascii-special-keys"
 
 wait = (callback) ->
   args = []
@@ -58,7 +57,7 @@ newError = (opts) ->
     err[k] = v 
   err
 
-_newModifierKeys = ->
+newModifierKeys = ->
   reset: ->
     @ctrlKey = false
     @altKey = false 
@@ -66,11 +65,13 @@ _newModifierKeys = ->
     @metaKey = false
     @          
   
+protocol = {}
+  
 protocol.init = (args..., done) ->
   [desired] = args 
   @browser = new Browser(desired)
   @browser.setMaxListeners(100)
-  @modifierKeys = _newModifierKeys().reset()
+  @modifierKeys = newModifierKeys().reset()
   @implicitWaiTimeout = 0
   @syncScriptTimeout = 30000
   @asyncScriptTimeout = 0    
@@ -269,7 +270,7 @@ protocol.executeAsync = (code, args ,done) ->
     
 protocol.safeExecuteAsync = protocol.executeAsync
 
-_querySelectorOrNull = (sel, done) ->  
+querySelectorOrNull = (sel, done) ->  
   waitForOp.apply @, [ 
     =>
       res = null
@@ -285,10 +286,10 @@ _querySelectorOrNull = (sel, done) ->
     
 protocol.elementOrNull = (searchType, value, done) ->
   switch searchType
-    when "class name" then _querySelectorOrNull.apply @, [".#{value}", done]
-    when "css selector" then _querySelectorOrNull.apply @, [value, done]    
-    when "id" then _querySelectorOrNull.apply @, ["##{value}", done]
-    when "name" then _querySelectorOrNull.apply @, ["[name='#{value}']", done]
+    when "class name" then querySelectorOrNull.apply @, [".#{value}", done]
+    when "css selector" then querySelectorOrNull.apply @, [value, done]    
+    when "id" then querySelectorOrNull.apply @, ["##{value}", done]
+    when "name" then querySelectorOrNull.apply @, ["[name='#{value}']", done]
     when "link text", "partial link text", "tag name", "xpath"
       protocol.elements.apply this, [ searchType, value, (err, res) ->
         if err? then done err
@@ -320,7 +321,7 @@ protocol.hasElement = (searchType, value, done) ->
       else done null, res?
   ]
 
-_transformRes = (rawRes) ->
+transformRes = (rawRes) ->
   i=0
   res=[]
   while rawRes[i]?
@@ -328,7 +329,7 @@ _transformRes = (rawRes) ->
     i++
   res
   
-_querySelectorAllOrNull = (sel, done) ->  
+querySelectorAllOrNull = (sel, done) ->  
   waitForOp.apply @, [ 
     =>
       rawRes = null
@@ -337,7 +338,7 @@ _querySelectorAllOrNull = (sel, done) ->
       catch err
         done err
         return true   
-      res = _transformRes rawRes if rawRes?
+      res = transformRes rawRes if rawRes?
       done null, res if res?.length >0
       (res?.length >0)
     , done
@@ -351,10 +352,10 @@ protocol.elements = (searchType, value, done) ->
     _done err, res
     
   switch searchType  
-    when "class name" then _querySelectorAllOrNull.apply this, [".#{value}", done]
-    when "css selector" then _querySelectorAllOrNull.apply this, [ value, done]
-    when "id" then _querySelectorAllOrNull.apply this, ["##{value}", done]
-    when "name" then _querySelectorAllOrNull.apply this, ["[name='#{value}']", done]
+    when "class name" then querySelectorAllOrNull.apply this, [".#{value}", done]
+    when "css selector" then querySelectorAllOrNull.apply this, [ value, done]
+    when "id" then querySelectorAllOrNull.apply this, ["##{value}", done]
+    when "name" then querySelectorAllOrNull.apply this, ["[name='#{value}']", done]
     when "link text" 
       waitForOp.apply @, [
         =>
@@ -364,7 +365,7 @@ protocol.elements = (searchType, value, done) ->
           catch err
             done err
             return true
-          res = (val for val in (_transformRes rawRes) \
+          res = (val for val in (transformRes rawRes) \
             when val.textContent is value)
           done null, res if (res?.length > 0)
           (res?.length > 0)
@@ -379,7 +380,7 @@ protocol.elements = (searchType, value, done) ->
           catch err
             done err
             return true
-          res = (val for val in (_transformRes rawRes) \
+          res = (val for val in (transformRes rawRes) \
             when (val.textContent?.indexOf value) >= 0)
           done null, res if (res?.length > 0)
           (res?.length > 0)
@@ -394,7 +395,7 @@ protocol.elements = (searchType, value, done) ->
           catch err
             done err
             return true
-          res = _transformRes rawRes        
+          res = transformRes rawRes        
           done null, res if (res?.length > 0)
           (res?.length > 0)
         , done
@@ -486,7 +487,7 @@ protocol.getValue = (element, done) ->
     , done
   ]
 
-_rawText = (element, done) ->  
+rawText = (element, done) ->  
   waitForOp.apply @, [
     =>
       value = null
@@ -508,10 +509,10 @@ protocol.text = (element, done) ->
   if (not element?) or (element is 'body')
     protocol.elementByTagName.apply this, ['body', (err, rootEl) ->
       return done err if err?
-      _rawText.apply this , [rootEl, done]
+      rawText.apply this , [rootEl, done]
     ]
   else
-    _rawText.apply this , [element, done]
+    rawText.apply this , [element, done]
 
 protocol.textPresent = (text ,element, done) ->  
   protocol.text.apply this, [element, (err, elText) ->
@@ -587,12 +588,12 @@ protocol.doubleclick = (done) ->
   #wait.apply this, [done]  
 
 
-_getAsciiVirtualKey = (specialKey) ->
+getAsciiVirtualKey = (specialKey) ->
   virtualKeyName = null
   virtualKeyName = k for k,v of SPECIAL_KEYS when v is specialKey
   if virtualKeyName? then ASCII_SPECIAL_KEYS[virtualKeyName] else null
 
-_rawType = (element, texts, done) ->  
+rawType = (element, texts, done) ->  
    
   if not(texts instanceof Array) then texts = [texts]
   for text in texts
@@ -609,7 +610,7 @@ _rawType = (element, texts, done) ->
             @modifierKeys[modifKeyName] = not(@modifierKeys[modifKeyName])
         else           
           if(char in SPECIAL_KEY_ARRAY)
-            virtualKeyCode = _getAsciiVirtualKey char              
+            virtualKeyCode = getAsciiVirtualKey char              
           else
             charCode = char.charCodeAt()            
           for eventType in ['keydown', 'keyup']
@@ -629,7 +630,7 @@ _rawType = (element, texts, done) ->
 protocol.type = (element, texts, done) ->
   if not(texts instanceof Array) then texts = [texts]
   @modifierKeys.reset()
-  _rawType.apply this , [ element, texts, (err) =>
+  rawType.apply this , [ element, texts, (err) =>
     return done err if err?
     @modifierKeys.reset()
     done null
@@ -639,7 +640,7 @@ protocol.type = (element, texts, done) ->
 protocol.keys = (texts, done) ->  
   if not(texts instanceof Array) then texts = [texts]
   element = @browser.document.active
-  _rawType.apply this , [ element, texts, (err) =>
+  rawType.apply this , [ element, texts, (err) =>
     return done err if err?
     done null
     #wait.apply this, [done]
