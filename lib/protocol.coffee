@@ -140,7 +140,7 @@ protocol.setWaitTimeout = protocol.setImplicitWaitTimeout
 protocol.eval = (code, done) ->
   res = null
   try
-    res = @browser.evaluate code    
+    res = @browser.evaluate code
   catch err
     return done newError(
       message: 'Evaluation failure.'
@@ -570,7 +570,8 @@ protocol.click = (args..., done) ->
   evObj.initEvent 'mouseup', true, false  
   evObj.button = button    
   activeEl .dispatchEvent evObj
-  wait.apply this, [done]  
+  done null
+  # wait.apply this, [done]  
 
 protocol.doubleclick = (done) ->
   activeEl = @browser.document.active
@@ -578,7 +579,8 @@ protocol.doubleclick = (done) ->
   evObj = @browser.document.createEvent 'MouseEvents'
   evObj.initEvent 'dblclick', true, false
   activeEl .dispatchEvent evObj
-  wait.apply this, [done]  
+  done null
+  #wait.apply this, [done]  
 
 
 _rawType = (element, texts, done) ->
@@ -621,7 +623,8 @@ protocol.type = (element, texts, done) ->
   _rawType.apply this , [ element, texts, (err) =>
     return done err if err?
     @modifierKeys.reset()
-    wait.apply this, [done]
+    done null
+    #wait.apply this, [done]
   ]
 
 protocol.keys = (texts, done) ->  
@@ -629,7 +632,8 @@ protocol.keys = (texts, done) ->
   element = @browser.document.active
   _rawType.apply this , [ element, texts, (err) =>
     return done err if err?
-    wait.apply this, [done]
+    done null
+    #wait.apply this, [done]
   ]
 
 protocol.clear = (element, done) ->
@@ -743,5 +747,8 @@ protocol.waitForConditionInBrowser = (conditionExpr, args..., cb) ->
     return cb("waitForConditionInBrowser failure for: " + conditionExpr)  unless res is true
     cb null, res
    ]  
+
+protocol.zombieBrowser = (done) ->
+  done null, @browser
 
 module.exports = protocol
