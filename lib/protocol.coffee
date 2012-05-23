@@ -1,5 +1,6 @@
 fs = require 'fs'
 Browser = require 'zombie'
+require "./jsdom-patch"
 uuid = require 'node-uuid'
 protocol = {}
 SPECIAL_KEYS = require "./special-keys"
@@ -12,6 +13,9 @@ MODIFIER_KEYS = {
   metaKey: '\uE03D'
 }
 MODIFIER_KEY_ARRAY = (v for k,v of MODIFIER_KEYS)
+ASCII_SPECIAL_KEYS = require "./ascii-special-keys"
+#SPECIAL_KEY_ARRAY = (v for k,v of SPECIAL_KEYS)
+
 
 wait = (callback) ->
   args = []
@@ -583,7 +587,13 @@ protocol.doubleclick = (done) ->
   #wait.apply this, [done]  
 
 
-_rawType = (element, texts, done) ->
+_getAsciiVirtualKey = (specialKey) ->
+  virtualKeyName = null
+  virtualKeyName = k for k,v of SPECIAL_KEYS when v is specialKey
+  if virtualKeyName? then ASCII_SPECIAL_KEYS[virtualKeyName] else null
+
+_rawType = (element, texts, done) ->  
+   
   if not(texts instanceof Array) then texts = [texts]
   for text in texts
     for char in text
@@ -597,13 +607,12 @@ _rawType = (element, texts, done) ->
             @modifierKeys.reset()
           else
             @modifierKeys[modifKeyName] = not(@modifierKeys[modifKeyName])
-        else 
+        else           
           if(char in SPECIAL_KEY_ARRAY)
-            virtualKeyCode = char;
+            virtualKeyCode = _getAsciiVirtualKey char              
           else
-            charCode = char.charCodeAt()          
-            element.value = element.value + char
-          for eventType in ['keydown', 'keypress', 'keyup']
+            charCode = char.charCodeAt()            
+          for eventType in ['keydown', 'keyup']
             do =>              
               evObj = @browser.document.createEvent "UIEvents"
               evObj.initEvent eventType, true, true
