@@ -60,7 +60,7 @@ browser.init({
 
 ### wd methods
 
-Interface identical to [wd](https://github.com/admc/wd).
+API identical to [wd](https://github.com/admc/wd).
 
 ### extra methods
 
