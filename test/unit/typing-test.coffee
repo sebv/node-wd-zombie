@@ -26,6 +26,14 @@ valueShouldEqual = (browser,element,expected, done) ->
     res.should.equal expected
     done null      
 
+click = (browser, _sel, done) ->
+  browser.elementByCss _sel, (err,inputField) ->
+    should.not.exist err
+    should.exist inputField
+    browser.clickElement inputField , (err) ->
+      should.not.exist err
+      done null
+
 typeAndCheck = (browser, _sel, chars, expected, done) ->
   browser.elementByCss _sel, (err,inputField) ->
     should.not.exist err
@@ -112,6 +120,9 @@ runTestWith = (remoteWdConfig, desired) ->
   browser = null;  
   testMethod = (method, sel) ->
     {
+      
+      "1/ click": (test) ->
+        click browser, sel, ( (err) -> test.done(err) )         
       "1/ typing nothing": (test) -> 
         inputAndCheck browser, method, sel, "", "", ( (err) -> test.done(err) )
       "2/ typing []": (test) -> 
@@ -132,16 +143,16 @@ runTestWith = (remoteWdConfig, desired) ->
         expected = (if sel.match /input/ then 'Hello' else 'Hello\n') 
         inputAndCheck browser, method, sel, 'Hello\n', expected, ( (err) -> test.done(err) )
       "10/ typing '\\r'": (test) -> 
-        expected = (if sel.match /input/ then 'Hello' else 'Hello\n\r') 
+        expected = (if sel.match /input/ then 'Hello' else 'Hello\n\n') 
         inputAndCheck browser, method, sel, '\r', expected, ( (err) -> test.done(err) )
       "11/ typing [returnKey]": (test) -> 
-        expected = (if sel.match /input/ then 'Hello' else 'Hello\n\r\r') 
+        expected = (if sel.match /input/ then 'Hello' else 'Hello\n\n\n') 
         inputAndCheck browser, method, sel, [returnKey], expected, ( (err) -> test.done(err) )
       "12/ typing [enterKey]": (test) -> 
-        expected = (if sel.match /input/ then 'Hello' else 'Hello\n\r\r\r') 
+        expected = (if sel.match /input/ then 'Hello' else 'Hello\n\n\n\n') 
         inputAndCheck browser, method, sel, [enterKey], expected, ( (err) -> test.done(err) )
       "13/ typing ' World!'": (test) -> 
-        expected = (if sel.match /input/ then 'Hello World!' else 'Hello\n\r\r\r World!') 
+        expected = (if sel.match /input/ then 'Hello World!' else 'Hello\n\n\n\n World!') 
         inputAndCheck browser, method, sel, ' World!', expected, ( (err) -> test.done(err) )
       "14/ clear": (test) -> 
         clearAndCheck browser, sel, ( (err) -> test.done(err) )

@@ -45,14 +45,14 @@ HTML.HTMLInputElement.prototype._eventDefaults.keypress = (e) ->
   if (e.charCode in SUBMIT_CHAR_CODE_ARRAY) or (e.keyCode in SUBMIT_VIRTUAL_KEY_ARRAY )
     e.target.form?.submit()
   else if e.keyCode in PRINTABLE_VIRTUAL_KEY_ARRAY 
-    e.target.value = e.target.value + String.fromCharCode(e.keyCode)
+    e.target.value = e.target.value + String.fromCharCode(e.keyCode).replace(/\r/g, '\n')
   else if e.charCode?
-    e.target.value = e.target.value + String.fromCharCode(e.charCode)    
+    e.target.value = e.target.value + String.fromCharCode(e.charCode).replace(/\r/g, '\n')    
 
-HTML.HTMLTextAreaElement.prototype._eventDefaults.keypress = (e) ->  
+HTML.HTMLTextAreaElement.prototype._eventDefaults.keypress = (e) ->    
   if (e.keyCode is 14) # Enter
-    e.target.value = e.target.value + '\r'
+    e.target.value = e.target.value + '\n'
   else if e.keyCode in PRINTABLE_VIRTUAL_KEY_ARRAY 
-    e.target.value = e.target.value + String.fromCharCode(e.keyCode)
+    e.target.value = e.target.value + String.fromCharCode(e.keyCode).replace(/\r/g, '\n')
   else if e.charCode?
-    e.target.value = e.target.value + String.fromCharCode(e.charCode)    
+    e.target.value = e.target.value + String.fromCharCode(e.charCode).replace(/\r/g, '\n')    
