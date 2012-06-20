@@ -1,6 +1,6 @@
 {
     "name": "wd-zombie"
-  , "version": "0.0.1"
+  , "version": "0.0.2"
   , "description": "wd headless implementation using zombie"
   , "keywords": ["zombie", "wd", "headless", "test"]
   , "author": "Seb Vincent <seb.vincent@gmail.com>"
