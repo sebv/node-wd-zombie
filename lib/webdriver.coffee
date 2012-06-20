@@ -13,9 +13,12 @@ MODIFIER_KEYS = {
   altKey: '\uE00A',
   metaKey: '\uE03D'
 }
+
 MODIFIER_KEY_ARRAY = (v for k,v of MODIFIER_KEYS)
 
 ASCII_SPECIAL_KEYS = require "./ascii-special-keys"
+
+{Element} = require './element'
 
 wait = (callback) ->
   args = []
@@ -282,7 +285,7 @@ querySelectorOrNull = (sel, done) ->
       catch err
         done err
         return true      
-      done null, res if res?        
+      done null, (new Element res, this) if res?        
       res?      
     , done  
   ]
@@ -294,9 +297,11 @@ Webdriver.prototype.elementOrNull = (searchType, value, done) ->
     when "id" then querySelectorOrNull.apply @, ["##{value}", done]
     when "name" then querySelectorOrNull.apply @, ["[name='#{value}']", done]
     when "link text", "partial link text", "tag name", "xpath"
-      @elements searchType, value, (err, res) ->
+      @elements searchType, value, (err, res) =>
         if err? then done err
-        done null, (if res?.length > 0 then res[0] else null)
+        done null, (
+          if res?.length > 0 then res[0] else null
+        )        
     else
       done "Search type #{searchType} not supported." 
   
@@ -334,7 +339,8 @@ querySelectorAllOrNull = (sel, done) ->
       catch err
         done err
         return true   
-      res = transformRes rawRes if rawRes?
+      if rawRes?  
+        res = ((new Element val, this) for val in (transformRes rawRes))
       done null, res if res?.length >0
       (res?.length >0)
     , done
@@ -360,8 +366,8 @@ Webdriver.prototype.elements = (searchType, value, done) ->
             rawRes = @browser.document.getElementsByTagName 'a'
           catch err
             done err
-            return true
-          res = (val for val in (transformRes rawRes) \
+            return true            
+          res = ((new Element val, this) for val in (transformRes rawRes) \
             when val.textContent is value)
           done null, res if (res?.length > 0)
           (res?.length > 0)
@@ -376,7 +382,7 @@ Webdriver.prototype.elements = (searchType, value, done) ->
           catch err
             done err
             return true
-          res = (val for val in (transformRes rawRes) \
+          res = ((new Element val, this) for val in (transformRes rawRes) \
             when (val.textContent?.indexOf value) >= 0)
           done null, res if (res?.length > 0)
           (res?.length > 0)
@@ -391,7 +397,7 @@ Webdriver.prototype.elements = (searchType, value, done) ->
           catch err
             done err
             return true
-          res = transformRes rawRes        
+          res = ((new Element val, this) for val in (transformRes rawRes))            
           done null, res if (res?.length > 0)
           (res?.length > 0)
         , done
@@ -405,7 +411,7 @@ Webdriver.prototype.elements = (searchType, value, done) ->
           catch err
             done err
             return true
-          res = (val for val in rawRes.value)     
+          res = ((new Element val, this) for val in rawRes.value)     
           done null, res if (res?.length > 0)
           (res?.length > 0)
         , done
@@ -447,6 +453,8 @@ for _searchType in elementFuncTypes
       @elements (elFuncFullType searchType), value, cb
   
 Webdriver.prototype.getAttribute = (element, attrName, done) ->  
+  if element instanceof Element then element = element.value
+    
   waitForOp.apply @, [
     =>
       attrValue = null;
@@ -466,6 +474,8 @@ Webdriver.prototype.getAttribute = (element, attrName, done) ->
   ]
 
 Webdriver.prototype.getValue = (element, done) ->  
+  if element instanceof Element then element = element.value
+  
   waitForOp.apply @, [
     =>
       value = null;
@@ -484,6 +494,8 @@ Webdriver.prototype.getValue = (element, done) ->
   ]
 
 rawText = (element, done) ->  
+  if element instanceof Element then element = element.value
+  
   waitForOp.apply @, [
     =>
       value = null
@@ -501,7 +513,7 @@ rawText = (element, done) ->
     , done
   ]
   
-Webdriver.prototype.text = (element, done) ->
+Webdriver.prototype.text = (element, done) ->  
   if (not element?) or (element is 'body')
     @elementByTagName 'body', (err, rootEl) ->
       return done err if err?
@@ -516,12 +528,16 @@ Webdriver.prototype.textPresent = (text ,element, done) ->
     done null, res
   
 Webdriver.prototype.clickElement = (element, done) ->
+  if element instanceof Element then element = element.value
+  
   @browser.fire "click", element, (err) =>
     if(err?) then return done err    
     @browser.document.active = element
     done null  
   
 Webdriver.prototype.moveTo = (element, args...,done) ->
+  if element instanceof Element then element = element.value
+  
   # position arguments not yet supported    
   @browser.fire "mousemove", element, (err) =>
     if(err?) then return done err
@@ -533,10 +549,11 @@ Webdriver.prototype.moveTo = (element, args...,done) ->
     @browser.document.active = element    
     done null  
 
-Webdriver.prototype.active = (done) ->
+Webdriver.prototype.active = (done) ->  
   res = null;
   try
     res = @browser.document.active
+    res = (new Element res, this) if res?
   catch err
     if(err?) then return done err
   done null, res
@@ -560,15 +577,15 @@ Webdriver.prototype.click = (args..., done) ->
   evObj = @browser.document.createEvent 'MouseEvents'
   evObj.initEvent 'click', true, false  
   evObj.button = button    
-  activeEl .dispatchEvent evObj
+  activeEl.dispatchEvent evObj
   evObj = @browser.document.createEvent 'MouseEvents'
   evObj.initEvent 'mousedown', true, false  
   evObj.button = button    
-  activeEl .dispatchEvent evObj
+  activeEl.dispatchEvent evObj
   evObj = @browser.document.createEvent 'MouseEvents'
   evObj.initEvent 'mouseup', true, false  
   evObj.button = button    
-  activeEl .dispatchEvent evObj
+  activeEl.dispatchEvent evObj
   done null
   # wait.apply this, [done]  
 
@@ -577,7 +594,7 @@ Webdriver.prototype.doubleclick = (done) ->
   # trigerring mouseover
   evObj = @browser.document.createEvent 'MouseEvents'
   evObj.initEvent 'dblclick', true, false
-  activeEl .dispatchEvent evObj
+  activeEl.dispatchEvent evObj
   done null
   #wait.apply this, [done]  
 
@@ -588,6 +605,7 @@ getAsciiVirtualKey = (specialKey) ->
   if virtualKeyName? then ASCII_SPECIAL_KEYS[virtualKeyName] else null
 
 rawType = (element, texts, done) ->  
+  if element instanceof Element then element = element.value
    
   if not(texts instanceof Array) then texts = [texts]
   for text in texts
@@ -622,6 +640,8 @@ rawType = (element, texts, done) ->
   done null
   
 Webdriver.prototype.type = (element, texts, done) ->
+  if element instanceof Element then element = element.value
+  
   if not(texts instanceof Array) then texts = [texts]
   @modifierKeys.reset()
   rawType.apply this , [ element, texts, (err) =>
@@ -641,6 +661,8 @@ Webdriver.prototype.keys = (texts, done) ->
   ]
 
 Webdriver.prototype.clear = (element, done) ->
+  if element instanceof Element then element = element.value
+  
   try 
     element.value = ''
   catch err

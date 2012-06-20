@@ -1103,7 +1103,7 @@
           }, function(done) {
             return browser.active(function(err, res) {
               should.not.exist(err);
-              res.should.equal(env.i1);
+              res.value.should.equal(env.i1.value);
               return done(null);
             });
           }, function(done) {
@@ -1114,7 +1114,7 @@
           }, function(done) {
             return browser.active(function(err, res) {
               should.not.exist(err);
-              res.should.equal(env.i2);
+              res.value.should.equal(env.i2.value);
               return done(null);
             });
           }
