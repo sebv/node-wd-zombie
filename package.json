@@ -1,6 +1,6 @@
 {
     "name": "wd-zombie"
-  , "version": "0.0.2"
+  , "version": "0.0.3"
   , "description": "wd headless implementation using zombie"
   , "keywords": ["zombie", "wd", "headless", "test"]
   , "author": "Seb Vincent <seb.vincent@gmail.com>"
@@ -11,8 +11,8 @@
     "test": "cake test"
   }
   , "dependencies": {
-    "zombie" : "=1.1.4"
-    , "jsdom": "=0.2.14"    
+    "zombie" : "=1.4.1"
+    , "jsdom": "~0.2.15"    
     , "node-uuid" : "1.3.x"    
   }
   , "devDependencies" : {    
