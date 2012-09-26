@@ -122,10 +122,13 @@ Webdriver.prototype.url = (done) ->
   done null, @browser.location.href    
   
 Webdriver.prototype.quit = (done) ->
-  @browser.windows.close(window) for window in @browser.windows.all()
-  @browser.close()
-  @browser = null
-  done null if done?
+  # added timeout to fix precocious quit issues
+  setTimeout =>
+    @browser.windows.close(window) for window in @browser.windows.all()
+    @browser.close()
+    @browser = null
+    done null if done?
+  , 1000
 
 Webdriver.prototype.close = (done) ->
   @browser.windows.close(@browser.windows.current)
