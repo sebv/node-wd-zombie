@@ -123,6 +123,7 @@ Webdriver.prototype.url = (done) ->
   
 Webdriver.prototype.quit = (done) ->
   @browser.windows.close(window) for window in @browser.windows.all()
+  @browser.close()
   @browser = null
   done null if done?
 
