@@ -6,7 +6,7 @@ wd-zombie is a partial [wd](https://github.com/admc/wd) API implementation using
 [zombie](https://github.com/assaf/zombie). 
 
 Note:
-  - This is only worth using for simple page, not relying heavily on Javacripts.   
+  - This is only worth using for simple pages, not relying heavily on Javacripts.   
   - This package wont be maintained/improved, at least until Zombie 2 is stable. 
 
 ## usage
