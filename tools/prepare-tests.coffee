@@ -5,7 +5,6 @@ disabledTests =
   'per-method-test': [
     'waitForElement'
     'waitForVisible'
-    'waitForElementFuncName'
     'getComputedCss'
     'takeScreenshot'
     'isVisible'
