@@ -1,1 +1,1 @@
-module.exports = require './lib/wd-zombie'
+module.exports = require './lib/main'

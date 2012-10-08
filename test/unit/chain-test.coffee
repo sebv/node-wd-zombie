@@ -1,11 +1,11 @@
 # mocha test
 
-{test} = require '../common-wd/per-method-test-base'
+{test} = require '../common-wd/chain-test-base'
 
 describe "wd-zombie", ->
   describe "unit", ->
 
-    describe "per method test", ->
+    describe "chain test", ->
       
       describe "using zombie", ->
         test 'zombie'

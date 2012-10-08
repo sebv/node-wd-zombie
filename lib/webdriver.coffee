@@ -1,4 +1,5 @@
 fs = require 'fs'
+async = require 'async'
 EventEmitter = require("events").EventEmitter
 Browser = require 'zombie'
 require "./jsdom-patch" 
@@ -72,7 +73,12 @@ newModifierKeys = ->
 class Webdriver extends EventEmitter
   constructor: ->
     @browser = null
-  
+    @defaultCapabilities =  
+      browserName: 'zombie',
+      version: '',
+      javascriptEnabled: true,
+      platform: 'ANY' 
+
 Webdriver.prototype.init = (args..., done) ->
   [desired] = args 
   @browser = new Browser(desired)
@@ -85,6 +91,53 @@ Webdriver.prototype.init = (args..., done) ->
   @pollMs = 25
   @waitTimeout = 1000
   done null, @browser
+
+
+# directly copied from wd
+`
+Webdriver.prototype.chain = function(){
+  var _this = this;
+
+  //add queue if not already here
+  if(!_this._queue){
+    _this._queue = async.queue(function (task, callback) {
+      if(task.args.length > 0 && typeof task.args[task.args.length-1] === "function"){
+        //wrap the existing callback
+        var func = task.args[task.args.length-1];
+        task.args[task.args.length-1] = function(){
+          func.apply(null, arguments);
+          callback();
+        }
+      } else {
+        //add a callback
+        task.args.push(callback);
+      }
+
+      //call the function
+      _this[task.name].apply(_this, task.args);
+    }, 1);
+  }
+
+  var chain = {};
+
+  //builds a placeHolder functions
+  var buildPlaceholder = function(name){
+    return function(){
+      _this._queue.push({name: name, args: Array.prototype.slice.apply(arguments)});
+      return chain;
+    }
+  }
+
+  //fill the chain with placeholders
+  for(var name in _this){
+    if(typeof _this[name] === "function" && name !== "chain"){
+      chain[name] = buildPlaceholder(name);
+    }
+  }
+
+  return chain;
+}
+`
 
 Webdriver.prototype.status = (done) ->
   done null, {status:'OK'}
@@ -497,6 +550,34 @@ Webdriver.prototype.getValue = (element, done) ->
     , done
   ]
 
+Webdriver.prototype.getTagName = (element, done) ->  
+  if element instanceof Element then element = element.value
+  done null, element.tagName?.toLowerCase() 
+
+Webdriver.prototype.isDisplayed = (element, cb) ->  
+  if element instanceof Element then element = element.value
+  # this is a hack, there is no good way to do it
+  current = element
+  visible = true
+  visible = visible and current.type isnt 'hidden'
+  while current?
+    if current.tagName?
+      do ->
+        visible = visible and current.style.getPropertyValue('display') isnt 'none'
+    current = current.parentNode
+  cb null, visible
+  
+Webdriver.prototype.displayed = Webdriver.prototype.isDisplayed
+
+Webdriver.prototype.getComputedCss = (element, cssProperty, cb) ->  
+  if element instanceof Element then element = element.value
+  for k,v of  @browser.window.getComputedStyle(element, null)
+    console.log "AKAKAK", k , (typeof v)
+  value = element.style.getPropertyCSSValue(cssProperty)
+  console.log "OKOKO value=", value
+  cb null, value
+
+    
 rawText = (element, done) ->  
   if element instanceof Element then element = element.value
   
