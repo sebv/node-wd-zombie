@@ -70,11 +70,27 @@ API identical to [wd](https://github.com/admc/wd).
 
 ### missing wd methods
 
+####
+
+
 - getComputedCss
 - takeScreenshot
 - isVisible
 - waitForElement
 - waitForVisible
+
+####
+
+- all the window + frame methods
+
+####
+
+- element.getTagName
+- element.isDisplayed
+- element.getComputedCss
+- element.getValue
+
+####
 
 - waitForElementByClassName
 - waitForElementByCssSelector
@@ -86,6 +102,8 @@ API identical to [wd](https://github.com/admc/wd).
 - waitForElementByXPath
 - waitForElementByCss
 
+####
+
 - waitForVisibleByClassName
 - waitForVisibleByCssSelector
 - waitForVisibleById
@@ -96,12 +114,6 @@ API identical to [wd](https://github.com/admc/wd).
 - waitForVisibleByXPath
 - waitForVisibleByCss
 
-- all the window + frame methods
-
-- element.getTagName
-- element.isDisplayed'
-- element.getComputedCss'
-- element.getValue'
 
 
 ### extra methods
