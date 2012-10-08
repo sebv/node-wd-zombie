@@ -2,8 +2,14 @@
 
 wd headless twin.
 
-wd-zombie is a [wd](https://github.com/admc/wd) API implementation using 
-[zombie](https://github.com/assaf/zombie).  
+wd-zombie is a partial [wd](https://github.com/admc/wd) API implementation using 
+[zombie](https://github.com/assaf/zombie). 
+
+Some methods are missing, see list below.
+
+Note:
+  - This is only worth using for simple page, not relying heavily on Javacripts.   
+  - This package wont be maintained/improved, at least until Zombie 2 is stable. 
 
 ## usage
 
@@ -62,12 +68,49 @@ browser.init({
 
 API identical to [wd](https://github.com/admc/wd).
 
+### missing wd methods
+
+- getComputedCss
+- takeScreenshot
+- isVisible
+- waitForElement
+- waitForVisible
+
+- waitForElementByClassName
+- waitForElementByCssSelector
+- waitForElementById
+- waitForElementByName
+- waitForElementByLinkText
+- waitForElementByPartialLinkText
+- waitForElementByTagName
+- waitForElementByXPath
+- waitForElementByCss
+
+- waitForVisibleByClassName
+- waitForVisibleByCssSelector
+- waitForVisibleById
+- waitForVisibleByName
+- waitForVisibleByLinkText
+- waitForVisibleByPartialLinkText
+- waitForVisibleByTagName
+- waitForVisibleByXPath
+- waitForVisibleByCss
+
+- all the window + frame methods
+
+- element.getTagName
+- element.isDisplayed'
+- element.getComputedCss'
+- element.getValue'
+
+
 ### extra methods
 
 *  retrieve the zombie browser object: 
   zombieBrowser(done) -> done(err, browser) 
 
 ## test
+once: cake prepare:test
 
-cake test
+then: cake test
 
