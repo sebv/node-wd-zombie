@@ -8,7 +8,9 @@
     return describe("unit", function() {
       return describe("typing test", function() {
         return describe("using zombie", function() {
-          return test('zombie');
+          return test({}, {
+            browserName: 'zombie'
+          });
         });
       });
     });

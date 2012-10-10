@@ -8,7 +8,9 @@
     return describe("unit", function() {
       return describe("per method test", function() {
         return describe("using zombie", function() {
-          return test('zombie');
+          return test({}, {
+            browserName: 'zombie'
+          });
         });
       });
     });
