@@ -8,4 +8,4 @@ describe "wd-zombie", ->
     describe "element test", ->
       
       describe "using zombie", ->
-        test 'zombie'
+        test {}, {browserName:'zombie'}
