@@ -20,7 +20,7 @@ task 'clean', 'Remove all js files', ->
 
 task 'test', 'Run All tests', ->
   u.mocha.test 'test/unit', (status) ->
-    process.exit status is status isnt 0
+    process.exit status unless status is 0
 
   #./node_modules/.bin/nodeunit 'test/unit/*.coffee'
 
