@@ -1,4 +1,5 @@
-# wd-zombie
+# wd-zombie [![Build Status](https://secure.travis-ci.org/sebv/node-wd-zombie.png?branch=master)](http://travis-ci.org/sebv/node-wd-zombie)
+
 
 wd headless twin.
 
