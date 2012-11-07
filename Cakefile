@@ -19,7 +19,8 @@ task 'clean', 'Remove all js files', ->
   u.js.clean JS_PATHS, undefined, /browser\-scripts/
 
 task 'test', 'Run All tests', ->
-  u.mocha.test 'test/unit'
+  u.mocha.test 'test/unit', (status) ->
+    process.exit status is status isnt 0
 
   #./node_modules/.bin/nodeunit 'test/unit/*.coffee'
 
@@ -45,5 +46,7 @@ task 'prepare:test', 'Import tests from wd and disable test for non-implemented 
         , (err) ->
           done err
   ] , (err) ->
-    console.log "ERROR:", err if err?
+    if err?
+      console.error err
+      process.exit(1)
       
