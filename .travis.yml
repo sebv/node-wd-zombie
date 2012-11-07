@@ -1,6 +1,8 @@
 language: node_js
 node_js:
   - 0.8
-before_script: "cake prepare:test"
+before_script: 
+  - "cake prepare:test"
+  - "sleep 5"
 script: "cake test"
 
