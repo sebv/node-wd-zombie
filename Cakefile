@@ -33,11 +33,10 @@ task 'prepare:test', 'Import tests from wd and disable test for non-implemented 
     (done) -> u.exec "mkdir -p #{targetDir}", done
     (done) -> u.exec "rm -rf #{targetDir}/*", done
     (done) -> u.exec "cp -r #{sourceDir}/* #{targetDir}/", done
-    (done) -> u.exec "rm -f #{targetDir}/*.js", done
     (done) -> u.exec "rm -f #{targetDir}/*test-base.coffee", done
     (done) -> 
       cp.execFile 'find', [ sourceDir  ] , (err, stdout, stderr) ->
-        files = (stdout.split '\n').filter( (name) -> name.match /.+-test\-base\.coffee/ )
+        files = (stdout.split '\n').filter( (name) -> name.match /.+-test\-base\.js/ )
         async.forEachSeries files, (f, done) ->
           filename = f.replace "#{sourceDir}/" , '' 
           prepareTest sourceDir, targetDir, filename, done 

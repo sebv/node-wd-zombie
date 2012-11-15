@@ -20,7 +20,7 @@ disabledTests =
     '.*'
   ]
 module.exports = (sourceDir, targetDir, filename , done) ->
-  fileKey = filename.replace '-base.coffee', ''
+  fileKey = filename.replace '-base.js', ''
   orig = null
   target = null
   async.series [
@@ -36,10 +36,12 @@ module.exports = (sourceDir, targetDir, filename , done) ->
       disabledTestsForFile = disabledTests[fileKey] or []
       async.forEachSeries orig.split('\n'), (line, done) ->                
         async.forEachSeries disabledTestsForFile, (d, done) ->
-          rx = new RegExp "describe \"*#{d}\"*"
+          rx = new RegExp "describe\\\(\"#{d}.*"
           if line.match rx
-            line = line.replace "describe", "if false then describe"
-            line = "#{line} # disabled be prepareTests"
+            line = line.replace "describe(\"", "describe(\"<DISABLED>"
+          rx = new RegExp "describe\\\(#{d}.*"
+          if line.match rx
+            line = line.replace "describe(", "describe(\"<DISABLED>\" + "
           done null
         , (err) ->
           unless err?

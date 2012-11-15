@@ -3,3 +3,5 @@
 --reporter spec
 -t 60000
 --bail
+-g DISABLED
+-i
