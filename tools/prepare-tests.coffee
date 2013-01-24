@@ -8,6 +8,8 @@ disabledTests =
     'getComputedCss'
     'takeScreenshot'
     'isVisible'
+    'getLocation'
+    'getSize'
     'err.inspect'
   ]
   'element-test':[
@@ -15,6 +17,7 @@ disabledTests =
     'element.isDisplayed'
     'element.getComputedCss'
     'element.getValue'
+    'element.element'
   ]
   'window-frame-test':[
     '.*'
